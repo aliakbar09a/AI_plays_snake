@@ -34,9 +34,13 @@ class Arena:
             pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
         return screen
     def newFood(self, color, list):
+        '''
+        list = snake body parts position list
+        '''
         found = False
+        size = self.blocksize
         while not found:
-            x = random.randint(2*size, width - size)
+            x = random.randint(size, width - size)
             x = x - (x%size)
             y = random.randint(size, height - size)
             y = y - (y%size)
@@ -47,4 +51,4 @@ class Arena:
                 i = i + 1
             if i == len(list):
                 found = True
-        self.food = (x, y)    
+        self.food = (x, y)
