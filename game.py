@@ -4,8 +4,8 @@ from Arena import *
 from snake import *
 import time
 
-width = 420
-height = 420
+width = 440
+height = 440
 block_length = 20
 
 pygame.init()

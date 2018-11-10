@@ -1,5 +1,6 @@
 import random
 import pygame
+import brain
 
 class snake:
     def __init__(self, width, height, size):
