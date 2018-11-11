@@ -19,8 +19,26 @@ class brain:
             self.weights.append(theta)
             self.bases.append(base)
     def decision_from_nn(self, x, y):
+        x, y = pos
+        fx, fy = self.nextFood
+        max_value = float(400*400)
+        food_cost = ((fx - x)**2 + (fy - y)**2)/max_value
+        print('food cost = ', food_cost)
+        wall_n = ((0 - y)**2)/max_value
+        wall_s = ((self.height - y)**2)/max_value
+        wall_e = ((self.width - x)**2)/max_value
+        wall_w = ((0 - x)**2)/max_value
+        wall_cost = wall_n + wall_s + wall_e + wall_w - 1
+        print('wall cost->', wall_cost, 'north=', wall_n, 'south=', wall_s, 'west=', wall_w, 'east=', wall_e)
+        cost_body = 0
+        for i in range(len(snake) - 1, 2, -1):
+            # print(i)
+            cost_body += ((x - snake[i][0])**2 + (y - snake[i][1])**2)/((i*self.block)**2)
+            # print(cost_body)
+        cost_body = len(snake) - cost_body
+        print('cost body = ', cost_body)
         l = self.block
-        input = np.array([x, y-l, x+l, y, x, y+l, x-l, y, self.nextFood[0], self.nextFood[1],self.height, self.width])
+        input = np.array([])
         # feed forward
         output = input
         for i in range(len(self.weights) - 1):
@@ -114,4 +132,4 @@ for i in range(2):
     # print(b.bases[i].shape)
     # print(b.outputs[i].shape)
     # print(b.outputs[i])
-print(b.decision_from_cost(120, 180, [(120,180),(140,180), (140,160), (160,160), (180, 160), (200,160), (200, 180)]))
+print(b.decision_from_cost(120, 180, [(120,180),(140,180), (140,160)]))
