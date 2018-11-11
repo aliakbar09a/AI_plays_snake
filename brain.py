@@ -18,8 +18,7 @@ class brain:
             base = np.random.rand(1, layers[i+1])
             self.weights.append(theta)
             self.bases.append(base)
-    def decision_from_nn(self, x, y):
-        x, y = pos
+    def decision_from_nn(self, x, y, snake):
         fx, fy = self.nextFood
         max_value = float(400*400)
         food_cost = ((fx - x)**2 + (fy - y)**2)/max_value
@@ -38,7 +37,7 @@ class brain:
         cost_body = len(snake) - cost_body
         print('cost body = ', cost_body)
         l = self.block
-        input = np.array([])
+        input = np.arange(12)
         # feed forward
         output = input
         for i in range(len(self.weights) - 1):
@@ -91,6 +90,13 @@ class brain:
         wall_w = ((0 - x)**2)/max_value
         wall_cost = wall_n + wall_s + wall_e + wall_w - 1
         print('wall cost->', wall_cost, 'north=', wall_n, 'south=', wall_s, 'west=', wall_w, 'east=', wall_e)
+        print('food cost = ', food_cost)
+        wall_n = ((20 - y)**2)/max_value
+        wall_s = ((self.height - 20 - y)**2)/max_value
+        wall_e = ((self.width - 20 - x)**2)/max_value
+        wall_w = ((20 - x)**2)/max_value
+        wall_cost = 4 - (wall_n + wall_s + wall_e + wall_w)
+        print('wall cost = ', wall_cost)
         cost_body = 0
         for i in range(len(snake) - 1, 2, -1):
             # print(i)
@@ -98,9 +104,10 @@ class brain:
             # print(cost_body)
         cost_body = len(snake) - cost_body
         print('cost body = ', cost_body)
-        return self.cost_weights[0]*food_cost + self.cost_weights[1]*wall_cost + self.cost_weights[2]*cost_body
+        return 10*food_cost + 0.1*wall_cost + cost_body
     def decision_from_cost(self, x, y, snake):
         min_cost = 1000
+        # finding cost for all three possibilities
         for i in range(3):
             newPos,_ = self.next_position_direction(x, y, i+1, self.direction)
             cost = self.cost(newPos, snake)
@@ -126,10 +133,6 @@ class brain:
 
 b = brain([12, 30, 30, 3])
 b.setNextFood((100, 300))
-b.decision_from_nn(180, 20)
-for i in range(2):
-    # print(b.weights[i].shape)
-    # print(b.bases[i].shape)
-    # print(b.outputs[i].shape)
-    # print(b.outputs[i])
-print(b.decision_from_cost(120, 180, [(120,180),(140,180), (140,160)]))
+b.decision_from_nn(80, 80, ((80, 80), (60, 80)))
+print(b.outputs[-1])
+print(b.decision_from_cost(80, 80, ((80, 80), (60, 80))))
