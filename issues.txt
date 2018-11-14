@@ -1,1 +1,1 @@
-1. Neural network input chosen wrong
+1. Neural network input chosen wrong -- taken care of

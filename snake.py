@@ -1,76 +1,157 @@
 import random
-import pygame
-import brain
+from pygame import draw
+from brain import *
 
 class snake:
     def __init__(self, width, height, size):
         self.list = []
+        self.direction = random.choice(['north', 'east', 'south', 'west'])
         self.width = width
         self.height = height
+        self.no_of_same_result = 0
         self.crash_wall = False
         self.crash_body = False
-        self.blocksize = size
-        x = random.randint(2*size, width - size)
+        self.block = size
+        self.Brain = brain([10, 32, 3], self.width, self.height, self.block)
+        x = random.randint(3*size, width - 2*size)
         self.head_x = x - (x%size)
-        y = random.randint(size, height - size)
+        y = random.randint(size, height - 2*size)
         self.head_y = y - (y%size)
         self.list.append((self.head_x, self.head_y))
-        self.list.append((self.head_x - size, self.head_y))
+        # self.list.append((self.head_x - size, self.head_y))
+        # self.list.append((self.head_x - (2*size), self.head_y))
     def draw(self, screen, color):
-        length = self.blocksize
+        length = self.block
         for (x, y) in self.list:
-            pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
+            draw.rect(screen, color, (x, y, length, length),1)
+            draw.rect(screen, color, (x+4, y+4, length-8, length-8))
         return screen
-
-    def check_up(self):
-        if self.head_y - self.blocksize < self.blocksize:
+    def isAlive(self):
+        if not self.crash_wall and not self.crash_body:
+            return True
+        else:
+            return False
+    def check_north(self):
+        if self.head_y - self.block < self.block:
             self.crash_wall = True
         for (x, y) in self.list:
-            if y == self.head_y - self.blocksize:
+            if x == self.head_x and y == self.head_y - self.block:
                 self.crash_body = True
-    def move_up(self):
-        self.check_up()
+    def move_north(self):
+        self.check_north()
         if not (self.crash_wall or self.crash_body):
-            self.head_y = self.head_y - self.blocksize
+            self.direction = 'north'
+            self.head_y = self.head_y - self.block
             self.list.insert(0, (self.head_x, self.head_y))
             self.list.pop()
 
-    def check_down(self):
-        if self.head_y + self.blocksize >= self.height - self.blocksize:
+    def check_south(self):
+        if self.head_y + self.block >= self.height - self.block:
             self.crash_wall = True
         for (x, y) in self.list:
-            if y == self.head_y + self.blocksize:
+            if x == self.head_x and y == self.head_y + self.block:
                 self.crash_body = True
-    def move_down(self):
-        self.check_down()
+    def move_south(self):
+        self.check_south()
         if not (self.crash_wall or self.crash_body):
-            self.head_y = self.head_y + self.blocksize
+            self.direction = 'south'
+            self.head_y = self.head_y + self.block
             self.list.insert(0, (self.head_x, self.head_y))
             self.list.pop()
 
-    def check_right(self):
-        if self.head_x + self.blocksize >= self.width - self.blocksize:
+    def check_east(self):
+        if self.head_x + self.block >= self.width - self.block:
             self.crash_wall = True
         for (x, y) in self.list:
-            if x == self.head_x + self.blocksize:
+            if x == self.head_x + self.block and y == self.head_y:
                 self.crash_body = True
-    def move_right(self):
-        self.check_right()
+    def move_east(self):
+        self.check_east()
         if not (self.crash_wall or self.crash_body):
-            self.head_x = self.head_x + self.blocksize
+            self.direction = 'east'
+            self.head_x = self.head_x + self.block
             self.list.insert(0, (self.head_x, self.head_y))
             self.list.pop()
 
-    def check_left(self):
-        if self.head_x - self.blocksize < self.blocksize:
+    def check_west(self):
+        if self.head_x - self.block < self.block:
             self.crash_wall = True
         for (x, y) in self.list:
-            if x == self.head_x - self.blocksize:
+            if x == self.head_x - self.block and y == self.head_y:
                 self.crash_body = True
-    def move_left(self):
-        self.check_left()
+    def move_west(self):
+        self.check_west()
         if not (self.crash_wall or self.crash_body):
-            self.head_x = self.head_x - self.blocksize
+            self.direction = 'west'
+            self.head_x = self.head_x - self.block
             self.list.insert(0, (self.head_x, self.head_y))
             self.list.pop()
+    def next_position_direction(self, result):
+        l = self.block
+        x = self.head_x
+        y = self.head_y
+        direction = self.direction
+        if direction == 'north':
+            if result == 1:
+                return (x, y - l)
+            elif result == 2:
+                return (x - l, y), 'west'
+            else:
+                return (x + l, y), 'east'
+        elif direction == 'east':
+            if result == 1:
+                return (x + l, y), 'east'
+            elif result == 2:
+                return (x, y - l), 'north'
+            else:
+                return (x, y + l), 'south'
+        elif direction == 'south':
+            if result == 1:
+                return (x, y + l), 'south'
+            elif result == 2:
+                return (x + l, y), 'east'
+            else:
+                return (x - l, y), 'west'
+        else:
+            if result == 1:
+                return (x - l, y), 'west'
+            elif result == 2:
+                return (x, y + l), 'south'
+            else:
+                return (x, y - l), 'north'
+
+    def increaseSize(self):
+        pos, _ = self.next_position_direction(1)
+        print('inc size ',pos)
+        self.head_x, self.head_y = pos[0], pos[1]
+        self.list.insert(0, (self.head_x, self.head_y))
+    def move(self, result):
+        if self.direction == 'north':
+            if result == 1:
+                self.move_north()
+            elif result == 2:
+                self.move_west()
+            else:
+                self.move_east()
+        elif self.direction == 'east':
+            if result == 1:
+                self.move_east()
+            elif result == 2:
+                self.move_north()
+            else:
+                self.move_south()
+        elif self.direction == 'south':
+            if result == 1:
+                self.move_south()
+            elif result == 2:
+                self.move_east()
+            else:
+                self.move_west()
+        else:
+            if result == 1:
+                self.move_west()
+            elif result == 2:
+                self.move_south()
+            else:
+                self.move_north()
+        return self.isAlive()

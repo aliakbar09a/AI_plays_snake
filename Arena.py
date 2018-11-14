@@ -4,10 +4,10 @@ import colors as col
 
 
 class Arena:
-    def __init__(self, width, height, blocksize):
+    def __init__(self, width, height, block):
         self.height = height
         self.width = width
-        self.blocksize = blocksize
+        self.block = block
         self.food = (0, 0)
 
     def setup_background(self, screen, color):
@@ -15,7 +15,7 @@ class Arena:
     def setup(self, screen, color_bg, color):
         self.setup_background(screen, color_bg)
         # building the horizontal walls
-        length = self.blocksize
+        length = self.block
         for x in range(0, self.width, length):
             y = 0
             # print('vertical (x, y)', x, y)
@@ -33,16 +33,16 @@ class Arena:
             pygame.draw.rect(screen, color, (x, y, length, length),1)
             pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
         return screen
-    def newFood(self, color, list):
+    def newFood(self, list):
         '''
         list = snake body parts position list
         '''
         found = False
-        size = self.blocksize
+        size = self.block
         while not found:
-            x = random.randint(size, width - size)
+            x = random.randint(2*size, self.width - 2*size)
             x = x - (x%size)
-            y = random.randint(size, height - size)
+            y = random.randint(2*size, self.height - 2*size)
             y = y - (y%size)
             i = 0
             while i < len(list):
@@ -52,3 +52,7 @@ class Arena:
             if i == len(list):
                 found = True
         self.food = (x, y)
+        return self.food
+    def drawFood(self, screen, color):
+        pygame.draw.rect(screen, color, (self.food[0], self.food[1], self.block, self.block))
+        return screen
