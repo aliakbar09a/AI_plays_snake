@@ -3,16 +3,17 @@ from pygame import draw
 from brain import *
 
 class snake:
-    def __init__(self, width, height, size):
+    def __init__(self, width, height, brainLayer, size, random_weights=True, random_bases=True):
         self.list = []
         self.direction = random.choice(['north', 'east', 'south', 'west'])
         self.width = width
         self.height = height
+        self.steps_taken = 0
         self.no_of_same_result = 0
         self.crash_wall = False
         self.crash_body = False
         self.block = size
-        self.Brain = brain([10, 32, 3], self.width, self.height, self.block)
+        self.Brain = brain(brainLayer, self.width, self.height, self.block, random_weights, random_bases)
         x = random.randint(3*size, width - 2*size)
         self.head_x = x - (x%size)
         y = random.randint(size, height - 2*size)
@@ -93,7 +94,7 @@ class snake:
         direction = self.direction
         if direction == 'north':
             if result == 1:
-                return (x, y - l)
+                return (x, y - l) ,'north'
             elif result == 2:
                 return (x - l, y), 'west'
             else:
@@ -122,7 +123,7 @@ class snake:
 
     def increaseSize(self):
         pos, _ = self.next_position_direction(1)
-        print('inc size ',pos)
+        # print('inc size ',pos, dir, 'snake', self.list, end=' ')
         self.head_x, self.head_y = pos[0], pos[1]
         self.list.insert(0, (self.head_x, self.head_y))
     def move(self, result):
@@ -154,4 +155,5 @@ class snake:
                 self.move_south()
             else:
                 self.move_north()
+        self.steps_taken += 1
         return self.isAlive()

@@ -1,7 +1,7 @@
 import random
 import numpy as np
 class brain:
-    def __init__(self, layers, width=440, height=440, block=20):
+    def __init__(self, layers, width, height, block, random_weights, random_bases):
         self.nextFood = None
         self.outputs = []
         self.weights = []
@@ -10,11 +10,14 @@ class brain:
         self.block = block
         self.width = width
         self.height = height
-        for i in range(len(layers) - 1):
-            theta = np.random.uniform(low=-1.0, high=1.0, size=(layers[i], layers[i+1]))
-            base = np.random.uniform(low=-0.05, high=0.05, size=(1, layers[i+1]))
-            self.weights.append(theta)
-            self.bases.append(base)
+        if random_weights == True:
+            for i in range(len(layers) - 1):
+                theta = np.random.uniform(low=-1.0, high=1.0, size=(layers[i], layers[i+1]))
+                self.weights.append(theta)
+        if random_bases == True:
+            for i in range(len(layers) - 1):
+                base = np.random.uniform(low=-0.05, high=0.05, size=(1, layers[i+1]))
+                self.bases.append(base)
     def direction_one_hot_encoding(self, direction):
         if direction == 'north':
             return np.array([1., .0, .0, .0])
@@ -118,11 +121,9 @@ class brain:
         return np.exp(mat) / np.sum(np.exp(mat), axis=1)
 
 if __name__ == '__main__':
-    b = brain([10, 8, 3])
-    b.setNextFood((100, 300))
-    b.decision_from_nn(80, 80, ((80, 80), (60, 80)), 'east')
-    b.decision_from_nn(80, 80, ((80, 80), (60, 80)), 'west')
-    b.decision_from_nn(80, 80, ((80, 80), (60, 80)), 'north')
-    b.decision_from_nn(80, 80, ((80, 80), (60, 80)), 'south')
-
-    # print(b.decision_from_cost(80, 80, ((80, 80), (60, 80))))
+    b = brain([10, 32, 32, 3], 440, 440, 20, True)
+    print(len(b.weights))
+    print(b.bases[0].shape)
+    print(b.bases[1].shape)
+    print(b.bases[2].shape)
+    print(b.bases[2].dtype)
