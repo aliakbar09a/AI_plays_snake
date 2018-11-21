@@ -18,20 +18,19 @@ class Arena:
         length = self.block
         for x in range(0, self.width, length):
             y = 0
-            # print('vertical (x, y)', x, y)
             pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
+            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
             y = self.height - length
             pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
+            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
         # building the vertical walls
         for y in range(length, self.height-length, length):
             x = 0
             pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
+            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
             x = self.width - length
             pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+4, y+4, length-8, length-8))
+            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
         return screen
     def newFood(self, list):
         '''

@@ -6,6 +6,7 @@ class snake:
     def __init__(self, width, height, brainLayer, size, random_weights=True, random_bases=True):
         self.list = []
         self.direction = random.choice(['north', 'east', 'south', 'west'])
+        # self.direction = 'east'
         self.width = width
         self.height = height
         self.steps_taken = 0
@@ -19,13 +20,10 @@ class snake:
         y = random.randint(size, height - 2*size)
         self.head_y = y - (y%size)
         self.list.append((self.head_x, self.head_y))
-        # self.list.append((self.head_x - size, self.head_y))
-        # self.list.append((self.head_x - (2*size), self.head_y))
     def draw(self, screen, color):
         length = self.block
         for (x, y) in self.list:
             draw.rect(screen, color, (x, y, length, length),1)
-            draw.rect(screen, color, (x+4, y+4, length-8, length-8))
         return screen
     def isAlive(self):
         if not self.crash_wall and not self.crash_body:
@@ -35,8 +33,8 @@ class snake:
     def check_north(self):
         if self.head_y - self.block < self.block:
             self.crash_wall = True
-        for (x, y) in self.list:
-            if x == self.head_x and y == self.head_y - self.block:
+        for i in range(len(self.list) - 1):
+            if self.list[i][0] == self.head_x and self.list[i][1] == (self.head_y - self.block):
                 self.crash_body = True
     def move_north(self):
         self.check_north()
@@ -49,8 +47,8 @@ class snake:
     def check_south(self):
         if self.head_y + self.block >= self.height - self.block:
             self.crash_wall = True
-        for (x, y) in self.list:
-            if x == self.head_x and y == self.head_y + self.block:
+        for i in range(len(self.list) - 1):
+            if self.list[i][0] == self.head_x and self.list[i][1] == (self.head_y + self.block):
                 self.crash_body = True
     def move_south(self):
         self.check_south()
@@ -63,8 +61,8 @@ class snake:
     def check_east(self):
         if self.head_x + self.block >= self.width - self.block:
             self.crash_wall = True
-        for (x, y) in self.list:
-            if x == self.head_x + self.block and y == self.head_y:
+        for i in range(len(self.list) - 1):
+            if self.list[i][0] == (self.head_x + self.block) and self.list[i][1] == self.head_y:
                 self.crash_body = True
     def move_east(self):
         self.check_east()
@@ -77,8 +75,8 @@ class snake:
     def check_west(self):
         if self.head_x - self.block < self.block:
             self.crash_wall = True
-        for (x, y) in self.list:
-            if x == self.head_x - self.block and y == self.head_y:
+        for i in range(len(self.list) - 1):
+            if self.list[i][0] == (self.head_x - self.block) and self.list[i][1] == self.head_y:
                 self.crash_body = True
     def move_west(self):
         self.check_west()
@@ -123,7 +121,6 @@ class snake:
 
     def increaseSize(self):
         pos, _ = self.next_position_direction(1)
-        # print('inc size ',pos, dir, 'snake', self.list, end=' ')
         self.head_x, self.head_y = pos[0], pos[1]
         self.list.insert(0, (self.head_x, self.head_y))
     def move(self, result):
