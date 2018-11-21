@@ -13,11 +13,11 @@ class brain:
         self.height = height
         if random_weights == True:
             for i in range(len(layers) - 1):
-                theta = np.random.uniform(low=0.0, high=0.1, size=(layers[i], layers[i+1]))
+                theta = np.random.uniform(low=0.0, high=1.0, size=(layers[i], layers[i+1]))
                 self.weights.append(theta)
         if random_bases == True:
             for i in range(len(layers) - 1):
-                base = np.random.uniform(low=-0.01, high=0.01, size=(1, layers[i+1]))
+                base = np.random.uniform(low=0.0, high=0.5, size=(1, layers[i+1]))
                 self.bases.append(base)
     def direction_one_hot_encoding(self, direction):
         if direction == 'north':
@@ -81,13 +81,13 @@ class brain:
         body_found = False
         while((x!=0) and (x!=self.width-self.block) and (y!=0) and (y!=self.height-self.block)):
             x, y = x + dirx, y + diry
+            distance += 1
             if(not food_found and fx == x and fy == y):
                 input[0] = 1
                 food_found = True
             if(not body_found and self.isBody(x, y, snake)):
                 input[1] = 1 / distance
                 body_found = True
-            distance += 1
         input[2] = 1 / distance
         return input
     def make_input(self, x, y, fx, fy, snake, direction):

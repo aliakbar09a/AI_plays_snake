@@ -9,7 +9,9 @@ class Arena:
         self.width = width
         self.block = block
         self.food = (0, 0)
-
+    def text_on_screen(self, font, text):
+        textsurface = font.render(text, True, (0, 0, 0))
+        return textsurface
     def setup_background(self, screen, color):
         screen.fill(color)
     def setup(self, screen, color_bg, color):

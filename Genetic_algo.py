@@ -3,83 +3,95 @@ import random
 import numpy as np
 import pickle
 from Arena import Arena
-from game import width, height, block_length
+from input import *
+import time
 
-population_size = 10000
-no_of_generations = 20
-# percent of best performing parents
-per_of_best_old_pop = 20.0
-# percent of worst performing parents
-per_of_worst_old_pop = 1.0
-mutation_percent = 1.0
-mutation_intensity = 0.001
-brain_layer = [24, 16, 3]
-
-
+def progress_bar(curr, total, length):
+    frac = curr/total
+    filled_bar = round(frac*length)
+    print('\r', '#'*filled_bar + '-'*(length - filled_bar), '[{:>7.2%}]'.format(frac), end='')
 def run(snakes, arena):
-    i = 0
-    count = [0 for _ in range(100)]
+    i = 1
+    count = [0 for _ in range(300)]
     snakes_killed = 0
-    for python in snakes:
-        # print('python', i, python.steps_taken)
-        food = arena.newFood(python.list)
-        python.Brain.setNextFood(food)
-        # print(food, end=" ")
-        while python.isAlive():
-            result, isFoodEaten= python.Brain.decision_from_nn(python.head_x, python.head_y, python.list, python.direction)
-            if python.steps_taken > 200:
-                python.crash_wall = True
-                python.crash_body = True
+    for s in snakes:
+        start_time = time.time()
+        checkloop = False
+        progress_bar(i, population_size, 30)
+        s.Brain.setNextFood(arena.newFood(s.list))
+        while s.isAlive():
+            result, isFoodEaten = s.Brain.decision_from_nn(s.head_x, s.head_y, s.list, s.direction)
+            # to check for loops formed by snake and then killing that snake
+            if s.steps_taken > 250:
+                if not checkloop:
+                    checkloop = True
+                    any_point_of_loop = (s.head_x, s.head_y)
+                    times = 0
+                elif (s.head_x, s.head_y) == any_point_of_loop:
+                    times += 1
+                if times > 2:
+                    s.crash_wall = True
+                    s.crash_body = True
+                    snakes_killed += 1
+            else:
+                checkloop = False
+            # forcefully killing if loop not caught
+            if time.time() - start_time > 0.5:
+                s.crash_wall = True
+                s.crash_body = True
                 snakes_killed += 1
+            # if food eaten by snake
             if(isFoodEaten):
-                python.increaseSize()
-                python.steps_taken = 0
-                python.Brain.prev_food_cost = 1
-                food = arena.newFood(python.list)
-                python.Brain.setNextFood(food)
-                # print(food, end=" ")
-            if python.move(result) == False:
+                s.increaseSize()
+                s.steps_taken = 0
+                start_time = time.time()
+                s.Brain.prev_food_cost = 1
+                food = arena.newFood(s.list)
+                s.Brain.setNextFood(food)
+            if s.move(result) == False:
                 break
-        count[len(python.list) - 1] += 1
+        count[len(s.list) - 1] += 1
         i += 1
-    print('total snakes : ', count, 'snakes killed', snakes_killed)
-    out.write('total snakes : ' + str(count) + ' snakes killed : ' + str(snakes_killed)+ '\n')
-def sort_based_on_fitness(snakes, make_live=False):
-    snakes.sort(key = lambda x: (len(x.list), x.steps_taken), reverse=True)
-    if make_live == True:
-        for python in snakes:
-            python.crash_wall, python.crash_body = False, False
-            python.steps_taken = 0
-            while len(python.list) > 1:
-                python.list.pop()
+    print('\nsnakes population with index as score : ', count, 'snakes killed', snakes_killed)
+    out.write('snakes population with index as score: ' + str(count) + ' snakes killed : ' + str(snakes_killed)+ '\n')
+def print_top_5(five_snakes):
+    i = 0
+    for snake in five_snakes:
+        i += 1
+        print('snake : ', i, ', score : ', len(snake.list)-1, ', steps : ', snake.steps_taken, end='\t')
+        out.write('snake : '+ str(i)+ ', score : '+ str(len(snake.list)-1)+', steps : '+str(snake.steps_taken)+'\t')
+        if snake.crash_body and snake.crash_wall:
+            print('crashed repetition')
+            out.write('crashed repetition\n')
+        elif snake.crash_wall and not snake.crash_body:
+            print('crashed wall')
+            out.write('crashed wall\n')
+        else:
+            print('crashed body')
+            out.write('crashed body\n')
+def save_top_snakes(snakes,  filename):
+    f = open(filename, 'wb')
+    pickle.dump(snakes, f)
+    f.close()
 def create_new_population(snakes):
-    # sorting the population wrt length of snake and steps taken
-    snakes.sort(key = lambda x: (len(x.list), -x.steps_taken), reverse=True)
-    file = open('best_snake3.pickle', 'wb')
-    pickle.dump(snakes[0], file)
-    file.close()
-    for i in range(10):
-        print('python', i, 'score : ', len(snakes[i].list), 'step : ', snakes[i].steps_taken, 'list', snakes[i].list, snakes[i].Brain.nextFood)
-        out.write('python'+ str(i)+ 'score : '+ str(len(snakes[i].list))+'step : '+str(snakes[i].steps_taken)+'list'+str(snakes[i].list)+str(snakes[i].Brain.nextFood)+'\n')
+
     # choosing the top x% of the population and breeding them to create new population
     # the top x% and bottom y% is also included in new population
     parents = []
-    # top_old_parents = int(population_size * per_of_best_old_pop / 100)
+    top_old_parents = int(population_size * per_of_best_old_pop / 100)
     bottom_old_parents = int(population_size * per_of_worst_old_pop / 100)
-    top_old_parents = 0
-    while len(snakes[top_old_parents].list) > 1:
-        top_old_parents += 1
-        parent = snake.snake(width, height, brain_layer, block_length, random_weights=False, random_bases=False)
+    for i in range(top_old_parents):
+        parent = snake.snake(width, height, brainLayer, block_length, random_weights=False, random_bases=False)
         parent.Brain.weights = snakes[i].Brain.weights
         parent.Brain.bases = snakes[i].Brain.bases
         parents.append(parent)
     for i in range(population_size - 1, population_size - bottom_old_parents - 1, -1):
-        parent = snake.snake(width, height, brain_layer, block_length, random_weights=False, random_bases=False)
+        parent = snake.snake(width, height, brainLayer, block_length, random_weights=False, random_bases=False)
         parent.Brain.weights = snakes[i].Brain.weights
         parent.Brain.bases = snakes[i].Brain.bases
-        parents.append(parent, )
-    # generating children of top x%
-    children = generate_children(parents, population_size - top_old_parents - bottom_old_parents)
+        parents.append(parent)
+    # generating children of top x% and bottom y%
+    children = generate_children(parents, population_size - (top_old_parents + bottom_old_parents))
     # mutating children
     children = mutate_children(children)
     # joining parents and children to make new population
@@ -99,57 +111,40 @@ def generate_children(parents, no_of_children):
     for count in range(no_of_children):
         parent1 = random.choice(parents)
         parent2 = random.choice(parents)
-        # parent1 = parents[count%l]
-        # parent2 = parents[(count+1)%l]
-        child = snake.snake(width, height, brain_layer, block_length, random_weights=False, random_bases=True)
-        # for i in range(len(parent1.Brain.weights)):
-        #     # taking alternate columns of weights from parent1 and parent2
-        #     theta = np.zeros(parent1.Brain.weights[i].shape)
-        #     for col in range(parent1.Brain.weights[i].shape[1]):
-        #         if col % 2 == 0:
-        #             theta[:,col] = parent1.Brain.weights[i][:,col]
-        #         else:
-        #             theta[:,col] = parent2.Brain.weights[i][:,col]
-        #     child.Brain.weights.append(theta)
+        child = snake.snake(width, height, brainLayer, block_length, random_weights=False, random_bases=True)
         for i in range(len(parent1.Brain.weights)):
-            # taking average of weights from parent1 and parent2
-            theta = (parent1.Brain.weights[i] + parent2.Brain.weights[i]) / 2
+            # taking alternate columns of weights from parent1 and parent2
+            theta = np.zeros(parent1.Brain.weights[i].shape)
+            for col in range(parent1.Brain.weights[i].shape[1]):
+                if col % 2 == 0:
+                    theta[:,col] = parent1.Brain.weights[i][:,col]
+                else:
+                    theta[:,col] = parent2.Brain.weights[i][:,col]
             child.Brain.weights.append(theta)
+            # for i in range(len(parent1.Brain.weights)):
+            # # taking average of weights from parent1 and parent2
+            # theta = (parent1.Brain.weights[i] + parent2.Brain.weights[i]) / 2
+            # child.Brain.weights.append(theta)
         all_children.append(child)
     return all_children
 def main():
-    snakes = [snake.snake(width, height, brain_layer, block_length) for _ in range(population_size)]
+    snakes = [snake.snake(width, height, brainLayer, block_length) for _ in range(population_size)]
     arena = Arena(width, height, block_length)
+    top_snakes = []
     for i in range(no_of_generations):
-        print('generation : ', i, ',', end='\t\t')
+        print('generation : ', i, ',', end='\n')
         out.write('generation : ' + str(i) +'\t')
         run(snakes, arena)
+        # sorting the population wrt length of snake and steps taken
+        snakes.sort(key = lambda x: (len(x.list), -x.steps_taken), reverse=True)
+        print_top_5(snakes[0:5])
+        # adding top snake of the generation to top_snakes
+        top_snakes.append(snakes[0])
+        # saving top snakes list as pickle
+        save_top_snakes(top_snakes, 'top_snakes.pickle')
         snakes = create_new_population(snakes)
 
 if __name__ == "__main__":
     out = open('output.txt', 'wt')
     main()
     out.close()
-
-
-            # if(closer_to_food == False):
-            #     python.steps_taken += 1000
-            #     snakes_killed += 1
-            #     python.crash_wall = True
-            #     python.crash_body =True
-            # if(result == python.Brain.prev_result):
-            #     python.no_of_same_result += 1
-            # else:
-            #     python.Brain.prev_result = result
-            # if(python.no_of_same_result > 50):
-            #     python.steps_taken = 0
-            #     python.crash_wall = True
-            #     python.crash_body =True
-        # if len(python.list) > 1 :
-        #     if python.crash_body and python.crash_body:
-        #         print('crashed repetition', end='\t')
-        #     elif python.crash_wall and not python.crash_body:
-        #         print('crashed wall', end='\t')
-        #     else:
-        #         print('crashed body', end='\t')
-        #     print('steps taken', python.steps_taken, '\t\tscore : ', len(python.list) - 1)
