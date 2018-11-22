@@ -17,22 +17,22 @@ class Arena:
     def setup(self, screen, color_bg, color):
         self.setup_background(screen, color_bg)
         # building the horizontal walls
-        length = self.block
-        for x in range(0, self.width, length):
+        l = self.block
+        for x in range(0, self.width, l):
             y = 0
-            pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
-            y = self.height - length
-            pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
+            pygame.draw.rect(screen, color, (x, y, l, l),1)
+            pygame.draw.rect(screen, color, (x+3, y+3, l-6, l-6))
+            y = self.height - l
+            pygame.draw.rect(screen, color, (x, y, l, l),1)
+            pygame.draw.rect(screen, color, (x+3, y+3, l-6, l-6))
         # building the vertical walls
-        for y in range(length, self.height-length, length):
+        for y in range(l, self.height-l, l):
             x = 0
-            pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
-            x = self.width - length
-            pygame.draw.rect(screen, color, (x, y, length, length),1)
-            pygame.draw.rect(screen, color, (x+2, y+2, length-4, length-4))
+            pygame.draw.rect(screen, color, (x, y, l, l),1)
+            pygame.draw.rect(screen, color, (x+3, y+3, l-6, l-6))
+            x = self.width - l
+            pygame.draw.rect(screen, color, (x, y, l, l),1)
+            pygame.draw.rect(screen, color, (x+3, y+3, l-6, l-6))
         return screen
     def newFood(self, list):
         '''

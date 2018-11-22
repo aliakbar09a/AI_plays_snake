@@ -3,10 +3,8 @@ from pygame import draw
 from brain import *
 
 class snake:
-    def __init__(self, width, height, brainLayer, size, random_weights=True, random_bases=True):
+    def __init__(self, width, height, brainLayer, size, random_weights=True, random_bases=True, random_start=False):
         self.list = []
-        self.direction = random.choice(['north', 'east', 'south', 'west'])
-        # self.direction = 'east'
         self.width = width
         self.height = height
         self.steps_taken = 0
@@ -15,15 +13,21 @@ class snake:
         self.crash_body = False
         self.block = size
         self.Brain = brain(brainLayer, self.width, self.height, self.block, random_weights, random_bases)
-        x = random.randint(3*size, width - 2*size)
-        self.head_x = x - (x%size)
-        y = random.randint(size, height - 2*size)
-        self.head_y = y - (y%size)
+        if random_start:
+            self.direction = random.choice(['east', 'north', 'west', 'east'])
+            x = random.randint(3*size, width - 2*size)
+            self.head_x = x - (x%size)
+            y = random.randint(size, height - 2*size)
+            self.head_y = y - (y%size)
+        else:
+            self.direction = 'east'
+            self.head_x, self.head_y = 40, 40
         self.list.append((self.head_x, self.head_y))
     def draw(self, screen, color):
-        length = self.block
+        l = self.block
         for (x, y) in self.list:
-            draw.rect(screen, color, (x, y, length, length),1)
+            draw.rect(screen, color, (x, y, l, l),1)
+            draw.rect(screen, color, (x+3, y+3, l-6, l-6))
         return screen
     def isAlive(self):
         if not self.crash_wall and not self.crash_body:
@@ -119,10 +123,21 @@ class snake:
             else:
                 return (x, y - l), 'north'
 
-    def increaseSize(self):
-        pos, _ = self.next_position_direction(1)
-        self.head_x, self.head_y = pos[0], pos[1]
-        self.list.insert(0, (self.head_x, self.head_y))
+    def onBody(self, x, y):
+        for i in range(3, len(self.list) - 1):
+            if self.list[i][0] == x and self.list[i][1] == y:
+                return True
+        return False
+
+    def increaseSize(self, result):
+        pos, dir = self.next_position_direction(result)
+        if (pos[0]!=0) and (pos[0]!=self.width-self.block) and (pos[1]!=0) and (pos[1]!=self.height-self.block) and (not self.onBody(pos[0], pos[1])):
+            self.head_x, self.head_y = pos[0], pos[1]
+            self.list.insert(0, (self.head_x, self.head_y))
+            self.direction = dir
+            return True
+        else:
+            return False
     def move(self, result):
         if self.direction == 'north':
             if result == 1:

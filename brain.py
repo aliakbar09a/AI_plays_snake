@@ -13,11 +13,11 @@ class brain:
         self.height = height
         if random_weights == True:
             for i in range(len(layers) - 1):
-                theta = np.random.uniform(low=0.0, high=1.0, size=(layers[i], layers[i+1]))
+                theta = np.random.uniform(low=-0.5, high=.5, size=(layers[i], layers[i+1]))
                 self.weights.append(theta)
         if random_bases == True:
             for i in range(len(layers) - 1):
-                base = np.random.uniform(low=0.0, high=0.5, size=(1, layers[i+1]))
+                base = np.random.uniform(low=-0.1, high=0.1, size=(1, layers[i+1]))
                 self.bases.append(base)
     def direction_one_hot_encoding(self, direction):
         if direction == 'north':
@@ -28,11 +28,6 @@ class brain:
             return np.array([.0, .0, 1., .0])
         else:
             return np.array([.0, .0, .0, 1.])
-    def ifAteFood(self, x, y):
-        if x == self.nextFood[0] and y == self.nextFood[1]:
-            return True
-        else:
-            return False
     # normalize x
     def nx(self, x):
         return (x - self.block + 1) / (self.width - 2*self.block)
@@ -135,41 +130,16 @@ class brain:
         closer_to_food = True
         fx, fy = self.nextFood
         input = self.make_input(x, y, fx, fy, snake, direction)
-        # x, y = self.nx(x), self.ny(y)
-        # fx, fy = self.nx(fx), self.ny(fy)
-        # max_value = float((self.width-2*self.block)*(self.height-2*self.block))
-        # food_cost = ((fx - x)**2 + (fy - y)**2)
-        # if food_cost > self.prev_food_cost:
-        #     closer_to_food = False
-        # self.prev_food_cost = food_cost
-        # print('food cost = ', food_cost)
-        # wall_n = ((0 - y)**2)
-        # wall_s = ((self.height - y)**2)
-        # wall_e = ((self.width - x)**2)
-        # wall_w = ((0 - x)**2)
-        # print('north=', wall_n, 'south=', wall_s, 'west=', wall_w, 'east=', wall_e)
-        # cost_body = 0
-        # for i in range(len(snake) - 1, 2, -1):
-        #     cost_body += ((x - self.nx(snake[i][0]))**2 + (y - self.ny(snake[i][1]))**2)
-        # dir = self.direction_one_hot_encoding(direction)
-        # dir = dir/4
-        # print(dir)
         input = np.array(input)
-        # input = np.append(input, dir)
-        # print('in', input, end='')
-        # print(input, end='\t')
         # feed forward
         output = input
         for i in range(len(self.weights) - 1):
             output = self.relu(np.dot(output, self.weights[i]) + self.bases[i])
             self.outputs.append(output)
         output = self.softmax(np.dot(output, self.weights[i+1]) + self.bases[i+1])
-        # output = self.relu(np.dot(output, self.weights[i+1]) + self.bases[i+1])
         self.outputs.append(output)
         result = np.argmax(self.outputs[-1]) + 1
-        # print('result', result, end='\t')
-        # print(output)
-        return result, self.ifAteFood(snake[0][0], snake[0][1])
+        return result
     # def cost(self, pos, snake):
     #     x, y = pos
     #     fx, fy = self.nextFood

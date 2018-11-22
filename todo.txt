@@ -1,1 +1,0 @@
-1. write a play function to display the fittest snake in action of the generation
