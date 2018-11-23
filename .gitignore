@@ -1,1 +1,2 @@
-*.pyc
+# pychache folder ignored
+__pycache__/*
