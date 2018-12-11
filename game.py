@@ -11,10 +11,16 @@ if __name__ == "__main__":
     # command line argument parser
     ap = argparse.ArgumentParser()
     ap.add_argument('-i', '--input', required=True, help='relative path of the saved pickle file')
+    ap.add_argument('-s', '--start', type=int, help='relative start of the saved snakes')
     args = vars(ap.parse_args())
     # loading the saved snakes
     file = open(args['input'], 'rb')
     snakes = pickle.load(file)
+    generation = 0
+    if args['start'] is not None:
+        start = args['start']
+        snakes = snakes[start:]
+        generation += start
     file.close()
     # pygame initialization
     pygame.init()
@@ -25,7 +31,7 @@ if __name__ == "__main__":
     # seed generated so that each snake sees same set of foods for performance comparison
     seed = random.random()
     arena = Arena(width, height, block_length)
-    generation = 0
+
     for saved_snake in snakes:
         t_snake = snake(width, height, brainLayer, block_length,
                         random_weights=False, random_bases=False)
