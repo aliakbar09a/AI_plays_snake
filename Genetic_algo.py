@@ -140,10 +140,10 @@ def generate_children(parents, no_of_children):
             for j in range(parent1.Brain.weights[i].shape[0]):
                 for k in range(parent1.Brain.weights[i].shape[1]):
                     child.Brain.weights[i][j, k] = random.choice(
-                        [parent1.Brain.weights[i][j, k], parent1.Brain.weights[i][j, k]])
+                        [parent1.Brain.weights[i][j, k], parent2.Brain.weights[i][j, k]])
             for j in range(parent1.Brain.bases[i].shape[1]):
                 child.Brain.bases[i][0, j] = random.choice(
-                    [parent1.Brain.bases[i][0, j], parent1.Brain.bases[i][0, j]])
+                    [parent1.Brain.bases[i][0, j], parent2.Brain.bases[i][0, j]])
         all_children.append(child)
     return all_children
 
