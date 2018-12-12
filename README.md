@@ -38,6 +38,11 @@ To run or test the snakes saved previously, run the following commands specifyin
 ```
 python3 game.py --input saved/test.pickle
 ```
+### Skipping steps
+To skip steps, simply add the -s or --steps argument to the call
+```
+python3 game.py --input saved/test.pickle --steps 50
+```
 ## Acknowledgement
 - Inspired by the video of Code-Bullet. Link : https://www.youtube.com/watch?v=3bhP7zulFfY
 - Game Visual inspired by YuriyGuts. Link : https://github.com/YuriyGuts/snake-ai-reinforcement
