@@ -152,10 +152,14 @@ def main():
     # command line argument parser
     ap = argparse.ArgumentParser()
     ap.add_argument('-o', '--output', required=True, help='relative path to save the snakes')
+    ap.add_argument('-g', '--generations', type=int, help='number of generations to train')
     args = vars(ap.parse_args())
     snakes = [snake.snake(width, height, brainLayer, block_length) for _ in range(population_size)]
     arena = Arena(width, height, block_length)
     top_snakes = []
+    no_of_generations = 30
+    if args['generations'] is not None:
+        no_of_generations = args['generations']
     for i in range(no_of_generations):
         print('generation : ', i+1, ',', end='\n')
         run(snakes, arena)
