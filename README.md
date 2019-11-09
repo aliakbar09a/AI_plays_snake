@@ -9,7 +9,7 @@ The snake looks in the 8 direction for food, body part and the boundary which ac
 ### Prerequisites
 To install the dependencies, run on terminal :
 ```
-python3 -m pip -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 ### Project Structure
